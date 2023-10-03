@@ -1,12 +1,35 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from firebase_admin import auth
+import firebase_admin
 import json
 
+# Inicializa o SDK do Firebase com as credenciais de serviço
+cred = firebase_admin.credentials.Certificate("credentials/firebase-credentials.json")
+firebase_admin.initialize_app(cred)
+
 app = Flask(__name__)
+
 CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pedramoura.db'  # Nome do arquivo do banco de dados SQLite
 db = SQLAlchemy(app)
+
+# Rota para autenticar o token
+@app.route('/auth', methods=['POST'])
+def authenticate_token():
+    data = request.get_json()
+    token = data.get('token')
+
+    if not token:
+        return jsonify({'error': 'Token não fornecido'}), 400
+
+    try:
+        decoded_token = auth.verify_id_token(token)
+        uid = decoded_token['uid']
+        return jsonify({'message': f'Token válido para o UID: {uid}'}), 200
+    except auth.InvalidIdTokenError:
+        return jsonify({'error': 'Token inválido'}), 401
 
 # Definição do modelo para a tabela "Rota"
 class Rota(db.Model):
