@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 import json
 
 app = Flask(__name__)
+CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pedramoura.db'  # Nome do arquivo do banco de dados SQLite
 db = SQLAlchemy(app)
 
@@ -115,8 +117,9 @@ def get_pedido():
         pedidos = Pedido.query.filter_by(idRota=rota_to_search) if rota_to_search else Pedido.query.all()
         pedido_list = []
         for pedido in pedidos:
-            pedido_list.append({'id': pedido.id, 'idRota': pedido.idRota, 'nomeCliente': pedido.nomeCliente, 'endereco': pedido.endereco, 'observacoes': pedido.observacoes, 'telefone': pedido.telefone, 'itensPedido': json.loads(pedido.itensPedido), 'statusEntrega': pedido.statusEntrega, 'observacoesEntrega': pedido.observacoesEntrega})
-        return jsonify({'rotas': pedido_list})
+            if pedido.statusEntrega != 'ENTREGUE':
+                pedido_list.append({'id': pedido.id, 'idRota': pedido.idRota, 'nomeCliente': pedido.nomeCliente, 'endereco': pedido.endereco, 'observacoes': pedido.observacoes, 'telefone': pedido.telefone, 'itensPedido': json.loads(pedido.itensPedido), 'statusEntrega': pedido.statusEntrega, 'observacoesEntrega': pedido.observacoesEntrega})
+        return jsonify({'pedidos': pedido_list})
 
 # Endpoint para buscar um Pedido pelo ID
 @app.route('/pedidos/<int:idPedido>', methods=['GET'])

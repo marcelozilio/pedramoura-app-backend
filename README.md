@@ -2,9 +2,9 @@
 
 ## Requirements
 ### Python modules
-* ``flask`` and ``flask_restful``: framework for running a HTTP web service
+* ``flask``, ``flask_cors`` and ``flask_restful``: framework for running a HTTP web service
 ```bash
-pip install flask flask_restful
+pip install flask flask_restful flask_cors
 ```
 ### Cloning the repository
 ```bash
@@ -14,7 +14,7 @@ git clone https://github.com/marcelozilio/pedramoura-delivery-route
 ## Usage
 ### Running web service
 ```bash
-cd pedramoura-delivery-route/
+cd pedramoura-app-backend
 python main.py
 ```
 The output must show the IP address:
