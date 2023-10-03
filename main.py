@@ -4,10 +4,13 @@ from flask_cors import CORS
 from firebase_admin import auth
 import firebase_admin
 import json
+import logging
+from functools import wraps
 
 # Inicializa o SDK do Firebase com as credenciais de serviço
 cred = firebase_admin.credentials.Certificate("credentials/firebase-credentials.json")
 firebase_admin.initialize_app(cred)
+logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 
@@ -15,21 +18,42 @@ CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pedramoura.db'  # Nome do arquivo do banco de dados SQLite
 db = SQLAlchemy(app)
 
-# Rota para autenticar o token
-@app.route('/auth', methods=['POST'])
-def authenticate_token():
-    data = request.get_json()
-    token = data.get('token')
+# Decorator para proteger rotas com autenticação JWT
+def authenticate_route(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        try:
+            # Obtenha o token JWT da solicitação
+            token = request.headers.get('Authorization')
+            
 
-    if not token:
-        return jsonify({'error': 'Token não fornecido'}), 400
+            if not token:
+                return jsonify({'message': 'Token de autenticação ausente'}), 401
 
-    try:
-        decoded_token = auth.verify_id_token(token)
-        uid = decoded_token['uid']
-        return jsonify({'message': f'Token válido para o UID: {uid}'}), 200
-    except auth.InvalidIdTokenError:
-        return jsonify({'error': 'Token inválido'}), 401
+            # Verifica autenticidade do token usando o Firebase Admin SDK
+            decoded_token = auth.verify_id_token(token)
+
+            # Se o token for válido, o UID do usuário pode ser obtido
+            user_uid = decoded_token['uid']
+
+            # Passe o UID do usuário como argumento para a rota protegida
+            return f(user_uid, *args, **kwargs)
+        
+        except auth.InvalidIdTokenError:
+            return jsonify({'message': 'Token inválido'}), 401
+        except auth.ExpiredIdTokenError:
+            return jsonify({'message': 'Token expirado'}), 401
+        except Exception as e:
+            return jsonify({'message': str(e)}), 401
+    
+    return decorated
+
+# Rota protegida com autenticação JWT
+@app.route('/protegido', methods=['GET'])
+@authenticate_route
+def protegido(user_uid):
+    # Esta rota é protegida e pode usar o UID do usuário
+    return jsonify({'message': f'Olá, usuário com UID {user_uid}! Este é um recurso protegido.'})
 
 # Definição do modelo para a tabela "Rota"
 class Rota(db.Model):
@@ -81,6 +105,8 @@ def create_rota():
 @app.route('/rotas', methods=['GET'])
 def get_rota():
     with app.app_context():
+        logging.debug('token->')
+
         status_to_search = request.args.get('status')
         rotas = Rota.query.filter_by(status=status_to_search) if status_to_search else Rota.query.all()
         rota_list = []
