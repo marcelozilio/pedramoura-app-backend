@@ -1,12 +1,13 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from firebase_admin import auth
+from functools import wraps
+from firebase_admin import credentials, auth
 import firebase_admin
 import json
 
-# Inicializa o SDK do Firebase com as credenciais de serviço
-cred = firebase_admin.credentials.Certificate("credentials/firebase-credentials.json")
+# Inicialize o SDK do Firebase Admin com as credenciais de serviço
+cred = credentials.Certificate("credentials/firebase-credentials.json")
 firebase_admin.initialize_app(cred)
 
 app = Flask(__name__)
@@ -15,21 +16,28 @@ CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pedramoura.db'  # Nome do arquivo do banco de dados SQLite
 db = SQLAlchemy(app)
 
-# Rota para autenticar o token
-@app.route('/auth', methods=['POST'])
-def authenticate_token():
-    data = request.get_json()
-    token = data.get('token')
+def authenticate_route(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        try:
+            token = request.headers.get('Authorization')
 
-    if not token:
-        return jsonify({'error': 'Token não fornecido'}), 400
+            if not token:
+                return jsonify({'message': 'Token de autorização ausente'}), 401
 
-    try:
-        decoded_token = auth.verify_id_token(token)
-        uid = decoded_token['uid']
-        return jsonify({'message': f'Token válido para o UID: {uid}'}), 200
-    except auth.InvalidIdTokenError:
-        return jsonify({'error': 'Token inválido'}), 401
+            decoded_token = auth.verify_id_token(token)
+
+            user_uid = decoded_token['uid']
+
+            return f(user_uid, *args, **kwargs)
+
+        except auth.InvalidIdTokenError as err:
+            print('Erro: InvalidIdTokenError-> ' + str(err))
+            return jsonify({'message': 'Token de autorização inválido'}), 401
+        except Exception as e:
+            return jsonify({'message': str(e)}), 401
+
+    return decorated
 
 # Definição do modelo para a tabela "Rota"
 class Rota(db.Model):
