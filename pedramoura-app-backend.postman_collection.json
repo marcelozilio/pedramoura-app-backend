@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "7751dff8-fb16-4a1d-afc9-4b44b204277d",
+		"_postman_id": "33212c4c-23e9-42c2-95ff-48e9d3a3113f",
 		"name": "pedramoura-app-backend",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28339347"
 	},
 	"item": [
 		{
@@ -264,7 +265,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://127.0.0.1:5000/rotas/111",
+							"raw": "http://127.0.0.1:5000/pedidos/111",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -274,7 +275,7 @@
 							],
 							"port": "5000",
 							"path": [
-								"rotas",
+								"pedidos",
 								"111"
 							]
 						}
