@@ -25,14 +25,11 @@ def authenticate_route(f):
             if not token:
                 return jsonify({'message': 'Token de autorização ausente'}), 401
 
-            decoded_token = auth.verify_id_token(token)
+            auth.verify_id_token(token)
 
-            user_uid = decoded_token['uid']
-
-            return f(user_uid, *args, **kwargs)
+            return f(*args, **kwargs)
 
         except auth.InvalidIdTokenError as err:
-            print('Erro: InvalidIdTokenError-> ' + str(err))
             return jsonify({'message': 'Token de autorização inválido'}), 401
         except Exception as e:
             return jsonify({'message': str(e)}), 401
@@ -75,14 +72,9 @@ class Pedido(db.Model):
         self.statusEntrega = statusEntrega
         self.observacoesEntrega = observacoesEntrega
 
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# ROTAS
-
-
 # Endpoint para criar uma nova rota
 @app.route('/rotas', methods=['POST'])
+@authenticate_route
 def create_rota():
     data = request.get_json()
     new_rota = Rota(quantidade=data['quantidade'], dataEntrega=data['dataEntrega'], kms=data['kms'], status=data['status'])
@@ -92,9 +84,9 @@ def create_rota():
         db.session.refresh(new_rota)
     return jsonify({'message': f'Rota criada com sucesso, ID: {new_rota.id}'})
 
-
 # Endpoint para listar todas as rotas
 @app.route('/rotas', methods=['GET'])
+@authenticate_route
 def get_rota():
     with app.app_context():
         status_to_search = request.args.get('status')
@@ -107,6 +99,7 @@ def get_rota():
 
 # Endpoint para buscar uma Rota pelo ID
 @app.route('/rotas/<int:idRota>', methods=['GET'])
+@authenticate_route
 def get_rota_by_id(idRota):
     with app.app_context():
         rota = Rota.query.get(idRota)
@@ -115,9 +108,9 @@ def get_rota_by_id(idRota):
         else:
             return jsonify({'message': f'Rota não encontrada, ID: {idRota}'}), 404
 
-
 # Endpoint para atualizar uma rota pelo ID
 @app.route('/rotas/<int:idRota>', methods=['PUT'])
+@authenticate_route
 def update_rota(idRota):
     rota = Rota.query.get(idRota)
     if not rota:
@@ -130,9 +123,9 @@ def update_rota(idRota):
     db.session.commit()
     return jsonify({'message': f'Rota atualizada com sucesso, ID: {idRota}'})
 
-
 # Endpoint para excluir uma rota pelo ID
 @app.route('/rotas/<int:idRota>', methods=['DELETE'])
+@authenticate_route
 def delete_rota(idRota):
     rota = Rota.query.get(idRota)
     if not rota:
@@ -141,14 +134,9 @@ def delete_rota(idRota):
     db.session.commit()
     return jsonify({'message': f'Rota excluída com sucesso, ID: {idRota}'})
 
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# PEDIDOS
-
-
 # Endpoint para criar um novo pedido
 @app.route('/pedidos', methods=['POST'])
+@authenticate_route
 def create_pedido():
     data = request.get_json()
     new_pedido = Pedido(idRota=data['idRota'], nomeCliente=data['nomeCliente'], endereco=data['endereco'], observacoes=data['observacoes'], telefone=data['telefone'], itensPedido=json.dumps(data['itensPedido']), statusEntrega=data['statusEntrega'], observacoesEntrega=data['observacoesEntrega'])
@@ -161,6 +149,7 @@ def create_pedido():
 
 # Endpoint para listar todas os pedidos
 @app.route('/pedidos', methods=['GET'])
+@authenticate_route
 def get_pedido():
     with app.app_context():
         rota_to_search = request.args.get('idRota')
@@ -171,9 +160,9 @@ def get_pedido():
                 pedido_list.append({'id': pedido.id, 'idRota': pedido.idRota, 'nomeCliente': pedido.nomeCliente, 'endereco': pedido.endereco, 'observacoes': pedido.observacoes, 'telefone': pedido.telefone, 'itensPedido': json.loads(pedido.itensPedido), 'statusEntrega': pedido.statusEntrega, 'observacoesEntrega': pedido.observacoesEntrega})
         return jsonify({'pedidos': pedido_list})
 
-
 # Endpoint para buscar um Pedido pelo ID
 @app.route('/pedidos/<int:idPedido>', methods=['GET'])
+@authenticate_route
 def get_pedido_by_id(idPedido):
     with app.app_context():
         pedido = Pedido.query.get(idPedido)
@@ -182,9 +171,9 @@ def get_pedido_by_id(idPedido):
         else:
             return jsonify({'message': f'Pedido não encontrado, ID: {idPedido}'}), 404
 
-
 # Endpoint para atualizar um pedido pelo ID
 @app.route('/pedidos/<int:idPedido>', methods=['PUT'])
+@authenticate_route
 def update_pedido(idPedido):
     pedido = Pedido.query.get(idPedido)
     if not pedido:
@@ -203,9 +192,9 @@ def update_pedido(idPedido):
     db.session.commit()
     return jsonify({'message': f'Pedido atualizado com sucesso, ID: {idPedido}'})
 
-
 # Endpoint para excluir um Pedido pelo ID
 @app.route('/pedidos/<int:idPedido>', methods=['DELETE'])
+@authenticate_route
 def delete_pedido(idPedido):
     pedido = Pedido.query.get(idPedido)
     if not pedido:
@@ -213,10 +202,6 @@ def delete_pedido(idPedido):
     db.session.delete(pedido)
     db.session.commit()
     return jsonify({'message': f'Pedido excluído com sucesso, ID: {idPedido}'})
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# MAIN
 
 if __name__ == '__main__':
     with app.app_context():
