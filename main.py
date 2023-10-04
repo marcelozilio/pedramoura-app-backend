@@ -20,7 +20,7 @@ def authenticate_route(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         try:
-            token = request.headers.get('Authorization')
+            token = request.headers.get('Authorization').replace("Bearer ", "")
 
             if not token:
                 return jsonify({'message': 'Token de autorização ausente'}), 401
