@@ -33,5 +33,228 @@ Press CTRL+C to quit
  * Debugger is active!
  * Debugger PIN: 816-201-332
 
-
 ```
+
+## API
+
+### Rotas
+
+<details>
+ <summary><code>POST</code> <code><b>/rotas</b></code> <code>(create new rota)</code></summary>
+
+##### Parameters
+
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | None      |  required | object (JSON)           | N/A  |
+
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `201`         | `application/json`                | { "message": "Rota criada com sucesso, ID: X" }                     |
+
+
+##### JSON object example
+```json
+{
+    "quantidade": 10,
+    "dataEntrega": "09/10/2023",
+    "kms": 492,
+    "status": "EM_PREPARACAO"
+}
+```
+
+</details>
+
+
+<details>
+ <summary><code>PUT</code> <code><b>/rotas/idRota</b></code> <code>(edit existing rota data)</code></summary>
+
+##### Parameters
+
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | idRota    |  required | required | int ($int64) | rota ID                                                           |
+
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `201`         | `application/json`                | { "message": "Rota atualizada com sucesso, ID: X" }                 |
+> | `404`         | `application/json`                | { "message": "Rota não encontrada, ID: X" }                         |
+
+</details>
+
+
+<details>
+ <summary><code>GET</code> <code><b>/rotas</b></code> <code>(gets all available rota)</code></summary>
+
+##### Parameters
+
+> None
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `201`         | `application/json`                | JSON containing all available rota                              |
+
+</details>
+
+
+<details>
+ <summary><code>GET</code> <code><b>/rotas/idRota</b></code> <code>(gets rota by id)</code></summary>
+
+##### Parameters
+
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | idRota    |  required | required | int ($int64) | rota ID                                                           |
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `201`         | `application/json`                | JSON containing rota data                                       |
+> | `404`         | `application/json`                | { "message": "Rota não encontrada, ID: X" }                         |
+
+</details>
+
+
+<details>
+ <summary><code>DELETE</code> <code><b>/rotas/idRota</b></code> <code>(delete rota by id)</code></summary>
+
+##### Parameters
+
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | idRota    |  required | required | int ($int64) | rota ID                                                           |
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `201`         | `application/json`                | { "message": "Rota excluída com sucesso, ID: X" }                   |
+> | `404`         | `application/json`                | { "message": "Rota não encontrada, ID: X" }                         |
+
+</details>
+
+
+
+
+### Pedidos
+
+<details>
+ <summary><code>POST</code> <code><b>/pedidos</b></code> <code>(create new pedido)</code></summary>
+
+##### Parameters
+
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | None      |  required | object (JSON)           | N/A  |
+
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `201`         | `application/json`                | { "message": "Pedido criado com sucesso, ID: X" }                   |
+
+
+##### JSON object example
+```json
+{
+    "idRota": 3,
+    "nomeCliente": "Vinicius Keller",
+    "endereco": "Av dos Estados 430, Sao Sebastiao do Cai",
+    "observacoes": "testes",
+    "telefone": "51 997264859",
+    "itensPedido": ["5 kg - Contra File", "5 kg - File Mignon"],
+    "statusEntrega": "PRONTO_PARA_ENTREGA",
+    "observacoesEntrega": "testes"
+}
+```
+
+</details>
+
+
+<details>
+ <summary><code>PUT</code> <code><b>/pedidos/idPedido</b></code> <code>(edit existing pedido data)</code></summary>
+
+##### Parameters
+
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | idPedido  |  required | required | int ($int64) | pedido ID                                                         |
+
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `201`         | `application/json`                | { "message": "Pedido atualizado com sucesso, ID: X" }               |
+> | `404`         | `application/json`                | { "message": "Pedido não encontrado, ID: X" }                       |
+
+</details>
+
+
+<details>
+ <summary><code>GET</code> <code><b>/pedidos</b></code> <code>(gets all available pedido)</code></summary>
+
+##### Parameters
+
+> None
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `201`         | `application/json`                | JSON containing all available pedido                            |
+
+</details>
+
+
+<details>
+ <summary><code>GET</code> <code><b>/pedidos/idPedido</b></code> <code>(gets pedido by id)</code></summary>
+
+##### Parameters
+
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | idPedido  |  required | required | int ($int64) | pedido ID                                                         |
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `201`         | `application/json`                | JSON containing pedido data                                     |
+> | `404`         | `application/json`                | { "message": "Pedido não encontrado, ID: X" }                       |
+
+</details>
+
+
+<details>
+ <summary><code>DELETE</code> <code><b>/pedidos/idPedido</b></code> <code>(delete pedido by id)</code></summary>
+
+##### Parameters
+
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | pedidos   |  required | required | int ($int64) | pedido ID                                                         |
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `201`         | `application/json`                | { "message": "Pedido excluído com sucesso, ID: X" }                 |
+> | `404`         | `application/json`                | { "message": "Pedido não encontrado, ID: X" }                       |
+
+</details>
+
+
+
+
+
