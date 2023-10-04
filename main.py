@@ -67,6 +67,12 @@ class Pedido(db.Model):
         self.statusEntrega = statusEntrega
         self.observacoesEntrega = observacoesEntrega
 
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# ROTAS
+
+
 # Endpoint para criar uma nova rota
 @app.route('/rotas', methods=['POST'])
 def create_rota():
@@ -75,7 +81,9 @@ def create_rota():
     with app.app_context():
         db.session.add(new_rota)
         db.session.commit()
-    return jsonify({'message': 'Rota criada com sucesso!'})
+        db.session.refresh(new_rota)
+    return jsonify({'message': f'Rota criada com sucesso, ID: {new_rota.id}'})
+
 
 # Endpoint para listar todas as rotas
 @app.route('/rotas', methods=['GET'])
@@ -88,39 +96,48 @@ def get_rota():
             rota_list.append({'id': rota.id, 'quantidade': rota.quantidade, 'dataEntrega': rota.dataEntrega, 'kms': rota.kms, 'status': rota.status})
         return jsonify({'rotas': rota_list})
 
+
 # Endpoint para buscar uma Rota pelo ID
-@app.route('/rotas/<int:rota_id>', methods=['GET'])
+@app.route('/rotas/<int:idRota>', methods=['GET'])
 def get_rota_by_id(idRota):
     with app.app_context():
         rota = Rota.query.get(idRota)
         if rota:
             return jsonify({'id': rota.id, 'quantidade': rota.quantidade, 'dataEntrega': rota.dataEntrega, 'kms': rota.kms, 'status': rota.status})
         else:
-            return jsonify({'message': 'Rota não encontrada'}), 404
+            return jsonify({'message': f'Rota não encontrada, ID: {idRota}'}), 404
+
 
 # Endpoint para atualizar uma rota pelo ID
 @app.route('/rotas/<int:idRota>', methods=['PUT'])
 def update_rota(idRota):
     rota = Rota.query.get(idRota)
     if not rota:
-        return jsonify({'message': 'Rota não encontrada'}), 404
+        return jsonify({'message': f'Rota não encontrada, ID: {idRota}'}), 404
     data = request.get_json()
     rota.quantidade = data['quantidade']
     rota.dataEntrega = data['dataEntrega']
     rota.kms = data['kms']
     rota.status = data['status']
     db.session.commit()
-    return jsonify({'message': 'Rota atualizada com sucesso!'})
+    return jsonify({'message': f'Rota atualizada com sucesso, ID: {idRota}'})
+
 
 # Endpoint para excluir uma rota pelo ID
 @app.route('/rotas/<int:idRota>', methods=['DELETE'])
 def delete_rota(idRota):
     rota = Rota.query.get(idRota)
     if not rota:
-        return jsonify({'message': 'Rota não encontrada'}), 404
+        return jsonify({'message': f'Rota não encontrada, ID: {idRota}'}), 404
     db.session.delete(rota)
     db.session.commit()
-    return jsonify({'message': 'Rota excluída com sucesso!'})
+    return jsonify({'message': f'Rota excluída com sucesso, ID: {idRota}'})
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# PEDIDOS
+
 
 # Endpoint para criar um novo pedido
 @app.route('/pedidos', methods=['POST'])
@@ -130,7 +147,9 @@ def create_pedido():
     with app.app_context():
         db.session.add(new_pedido)
         db.session.commit()
-    return jsonify({'message': 'Pedido criado com sucesso!'})
+        db.session.refresh(new_pedido)
+    return jsonify({'message': f'Pedido criado com sucesso, ID: {new_pedido.id}'})
+
 
 # Endpoint para listar todas os pedidos
 @app.route('/pedidos', methods=['GET'])
@@ -144,6 +163,7 @@ def get_pedido():
                 pedido_list.append({'id': pedido.id, 'idRota': pedido.idRota, 'nomeCliente': pedido.nomeCliente, 'endereco': pedido.endereco, 'observacoes': pedido.observacoes, 'telefone': pedido.telefone, 'itensPedido': json.loads(pedido.itensPedido), 'statusEntrega': pedido.statusEntrega, 'observacoesEntrega': pedido.observacoesEntrega})
         return jsonify({'pedidos': pedido_list})
 
+
 # Endpoint para buscar um Pedido pelo ID
 @app.route('/pedidos/<int:idPedido>', methods=['GET'])
 def get_pedido_by_id(idPedido):
@@ -152,14 +172,15 @@ def get_pedido_by_id(idPedido):
         if pedido:
             return jsonify({'id': pedido.id, 'idRota': pedido.idRota, 'nomeCliente': pedido.nomeCliente, 'endereco': pedido.endereco, 'observacoes': pedido.observacoes, 'telefone': pedido.telefone, 'itensPedido': json.loads(pedido.itensPedido), 'statusEntrega': pedido.statusEntrega, 'observacoesEntrega': pedido.observacoesEntrega})
         else:
-            return jsonify({'message': 'Pedido não encontrada'}), 404
+            return jsonify({'message': f'Pedido não encontrado, ID: {idPedido}'}), 404
+
 
 # Endpoint para atualizar um pedido pelo ID
 @app.route('/pedidos/<int:idPedido>', methods=['PUT'])
 def update_pedido(idPedido):
     pedido = Pedido.query.get(idPedido)
     if not pedido:
-        return jsonify({'message': 'Pedido não encontrado'}), 404
+        return jsonify({'message': f'Pedido não encontrado, ID: {idPedido}'}), 404
     data = request.get_json()
 
     pedido.idRota = data['idRota']
@@ -172,17 +193,22 @@ def update_pedido(idPedido):
     pedido.observacoesEntrega = data['observacoesEntrega']
 
     db.session.commit()
-    return jsonify({'message': 'Pedido atualizado com sucesso!'})
+    return jsonify({'message': f'Pedido atualizado com sucesso, ID: {idPedido}'})
+
 
 # Endpoint para excluir um Pedido pelo ID
 @app.route('/pedidos/<int:idPedido>', methods=['DELETE'])
 def delete_pedido(idPedido):
     pedido = Pedido.query.get(idPedido)
     if not pedido:
-        return jsonify({'message': 'Pedido não encontrado'}), 404
+        return jsonify({'message': f'Pedido não encontrado, ID: {idPedido}'}), 404
     db.session.delete(pedido)
     db.session.commit()
-    return jsonify({'message': 'Peiddo excluído com sucesso!'})
+    return jsonify({'message': f'Pedido excluído com sucesso, ID: {idPedido}'})
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# MAIN
 
 if __name__ == '__main__':
     with app.app_context():
