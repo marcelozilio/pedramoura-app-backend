@@ -20,12 +20,12 @@ def authenticate_route(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         try:
-            token = request.headers.get('Authorization').replace("Bearer ", "")
+            token = request.headers.get('Authorization')
 
             if not token:
                 return jsonify({'message': 'Token de autorização ausente'}), 401
 
-            auth.verify_id_token(token)
+            auth.verify_id_token(token.replace("Bearer ", ""))
 
             return f(*args, **kwargs)
 
@@ -93,7 +93,8 @@ def get_rota():
         rotas = Rota.query.filter_by(status=status_to_search) if status_to_search else Rota.query.all()
         rota_list = []
         for rota in rotas:
-            rota_list.append({'id': rota.id, 'quantidade': rota.quantidade, 'dataEntrega': rota.dataEntrega, 'kms': rota.kms, 'status': rota.status})
+            if rota != 'ENTREGUE':
+                rota_list.append({'id': rota.id, 'quantidade': rota.quantidade, 'dataEntrega': rota.dataEntrega, 'kms': rota.kms, 'status': rota.status})
         return jsonify({'rotas': rota_list})
 
 
